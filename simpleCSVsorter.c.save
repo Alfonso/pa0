@@ -1,0 +1,21 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <mergesort.h>
+
+void sortByCol(){
+	
+	return;
+}
+
+int main(int argc, char* argv[]){
+
+	// how is CSV file read in???????
+
+	if(argc < 3){
+		printf("Bad input\n");
+		return -1;
+	}
+	char* column[] = argv[2];
+	sortByCol(file, column);
+	return 0;
+}
