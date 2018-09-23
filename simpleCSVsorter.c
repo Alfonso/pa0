@@ -4,6 +4,7 @@
 #include <mergesort.h>
 #include <time.h>
 
+
 typedef struct _row{
 	// make a field for every column (?)
 	char* color;
@@ -41,12 +42,17 @@ row* makeStruct(file){
 	// scan csv file
 	row* head = (row*)malloc(sizeof(row));
 	row* realHead = head;
+	// do one scan to process column names
+
+	// rest of scanning
 	while (fscanf(file, "%s,%s,%d,%d,%d,%d,%s,%d,%d,%s,%s,%s,%d,%d,%s,%d,%s,%s,%d,%s,%s,%s,%d,%d,%d,%d,%d,%d",
 		 &color, &director_name, &num_critic_for_reviews, &duration, &director_facebook_likes, &actor_3_facebook_likes, &actor_2_name, &actor_1_facebook_likes, &gross, &genres, &actor_1_name, &movie_title, &num_voted_users, &cast_total_facebook_likes, &actor_3_name, &facenumber_in_poster, &plot_keywords, &movie_imdb_link, &num_user_for_reviews, &language, &country, &content_rating, &budget, &title_year, &actor_2_facebook_likes, &imdb_score, &aspect_ratio, &movie_facebook_likes)==28){		
 		// make each row a struct ptr
 		row* temp = (row*)malloc(sizeof(row));
-		temp = {color, director_name, num_critic_for_reviews, duration, director_facebook_likes, actor_3_facebook_likes, actor_2_names, actor_1_facebook_likes, gross, genres, actor_1_name, movie_title, num_voted_users, cast_total_facebook_likes, actor_3_name, facenumber_in_poster, plot_keywords, movie_imdb_link, num_user_for_reviews, language, country, content_rating, budget, title_year, actor_2_facebook_likes, imdb_score, aspect_ratio, movie_facebook_likes, head};
+		*temp = {color, director_name, num_critic_for_reviews, duration, director_facebook_likes, actor_3_facebook_likes, actor_2_names, actor_1_facebook_likes, gross, genres, actor_1_name, movie_title, num_voted_users, cast_total_facebook_likes, actor_3_name, facenumber_in_poster, plot_keywords, movie_imdb_link, num_user_for_reviews, language, country, content_rating, budget, title_year, actor_2_facebook_likes, imdb_score, aspect_ratio, movie_facebook_likes, head};
 		head = temp;
+
+		// REMEMBER to add attribute node and point it to row node
 	}
 	// create a LL + return head
 	return realHead;	
@@ -54,15 +60,22 @@ row* makeStruct(file){
 }
 
 void sortAndWrite(FILE* file, column){
-	row* csvStruct = makeStruct(file); // scan csv and create struct LL to represent it
-	csvStruct = mergesort(csvStruct); // sort struct LL
+	node* csvStruct = makeStruct(file); // scan csv and create struct LL to represent it
+	// take nodes with null data and put in on list, keeping order that we read from
+	// reattach these to the front after sorting
+	 mergesort(&csvStruct); // sort struct LL
+	// reattach nodes with null data to beginning of the sorted list
+	
 	// convert to file
 	FILE* result = fopen("result.csv", "w+");
 	while(csvStruct != NULL){
 		// each attribute struct links to a row struct
-		csvStruct->rowStruct = row;
+		row* temp = csvStruct->rowstruct;
+		
+		write(result, temp->color, sizeof(temp->color));		// ^^ is th:is right? 
 		// access each field in row struct and write to csv file
 		// ???????? lmao 
+		csvStruct = csvStruct->next;
 	}
 	// return csv file
 	return result;
