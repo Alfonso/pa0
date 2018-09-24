@@ -39,7 +39,7 @@ typedef struct _row{
 } row;
 */
 
-node* makeStruct(file){
+node* makeStruct(FILE *file, char* column){
 
 	
 	// remaining problem: how to deal with different types?!?
@@ -47,11 +47,84 @@ node* makeStruct(file){
 	
 
 	// scan csv 
+	
 	// scan first row differently (bc names)
 		// go column by column, incrementing counter as you go (use temp)
 		// if input matches column, save this as counter value (counter = temp)
 		// continue until end to save number of columns
 	
+	char *col = *column;
+	int index = 0;
+	int temp = 0;
+	int r = 0, c = 0;
+	char* line = (char*)malloc(1000000 * sizeof(char));
+	char* token = (char*)malloc(1000000*(sizeof(char)));
+	const char s[2] = ",";
+
+	// tokenize first row, find column index + number of cols
+
+	if(fscanf(file, "%s\n", line)==1){
+
+                token = strtok(line, s);
+                while(token != NULL){
+                        // do stuff with token here
+                         if(strcmp(col, token) == 0){
+                                index = temp; // if input col = current col, set target index to current temp val 
+                        }
+			temp++;
+			c++; // increment number of cols
+                        token = strtok(NULL, s); // make new token
+                }
+        }
+
+	// go thru file + count number of rows
+
+	while(fscanf(file, "%s\n", line)==1){
+		r++;
+	}
+
+	// malloc 2D array
+		// 2D array of strings right? So a 3D array? lmao
+	int i = 0;
+	char* arr[r][c];
+	int i = 0, j = 0;
+	for(i = 0; i < r; i++){ // malloc space for each string
+		for(j = 0; j < c; j++){
+			// is ths type right? or should it be char** ????
+			arr[i][j] = (char*)malloc(1000 * sizeof(char));
+		}
+	}
+
+	rewind(file); // go back to beginning of file to initialize array
+	
+	// tokenize file 
+		// initialize array AND set up LL nodes w/ refs to array rows	
+	fscanf(file, "%s\n", line); // skip first line
+
+	i = 0;
+	j = 0;
+	while(fscanf(file, "%s\n", line)==1){
+		
+		token = strtok(line, s);
+		while(token != NULL){
+			// do stuff with token here
+
+			// if token is empty/NULL
+				// add to separate LL
+				// arr[i][j] = null ???
+			arr[i][j] = token;
+			if(j == index){
+				// create node 
+				node->data = token;
+				node->parent = &arr[i]; // do i need ampersand?? or is just arr[i] enough?
+			}
+			token = strtok(NULL, s); // make new token	
+			j++;
+		}
+		j = 0;
+		i++;
+	}
+
 	// need number of rows for 2D array
 		// traverse csv for numRows
 		// rewind file
