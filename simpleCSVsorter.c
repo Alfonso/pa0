@@ -99,10 +99,14 @@ node* makeStruct(FILE *file, char* column){
 	
 	// tokenize file 
 		// initialize array AND set up LL nodes w/ refs to array rows	
+
 	fscanf(file, "%s\n", line); // skip first line
 
 	i = 0;
 	j = 0;
+
+	node* head = (node*)malloc(sizeof(node)); // malloc head node
+
 	while(fscanf(file, "%s\n", line)==1){
 		
 		token = strtok(line, s);
@@ -115,8 +119,11 @@ node* makeStruct(FILE *file, char* column){
 			arr[i][j] = token;
 			if(j == index){
 				// create node 
+				node* temp = (node*)malloc(sizeof(node));
 				node->data = token;
 				node->parent = &arr[i]; // do i need ampersand?? or is just arr[i] enough?
+				temp->next = head;
+				head = temp;
 			}
 			token = strtok(NULL, s); // make new token	
 			j++;
