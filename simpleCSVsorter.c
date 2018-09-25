@@ -4,41 +4,6 @@
 #include <mergesort.h>
 #include <time.h>
 
-/*
-typedef struct _row{
-	// make a field for every column (?)
-	char* color;
-	char* director_name;
-	int num_critic_for_reviews;
-	int duration;
-	int director_facebook_likes;
-	int actor_3_facebook_likes;
-	char* actor_2_name[];
-	int actor_1_facebook_likes;
-	long gross;
-	char* genres;
-	char* actor_1_name;
-	char* movie_title;
-	int num_voted;
-	int case_total_facebook_likes;
-	char* actor_3_name;
-	int facenumber_in_poster;
-	char* plot_keywords;
-	char* movie_imdb_link;
-	int num_user_for_reviews;
-	char* language;
-	char* country;
-	char* content_rating;
-	long budget;
-	int title_year;
-	int actor_2_facebook_likes;
-	float imdb_score;
-	float aspect_ratio;
-	int movie_facebook_likes;
-	struct row* next;
-} row;
-*/
-
 node* makeStruct(FILE *file, char* column){
 
 	
@@ -57,6 +22,7 @@ node* makeStruct(FILE *file, char* column){
 	int index = 0;
 	int temp = 0;
 	int r = 0, c = 0;
+	
 	char* line = (char*)malloc(1000000 * sizeof(char));
 	char* token = (char*)malloc(1000000*(sizeof(char)));
 	const char s[2] = ",";
