@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "simpleCSVsorter.h"
+//#include "mergesort.c"
 
 int main(int argc, char** argv){
 
@@ -11,13 +13,27 @@ int main(int argc, char** argv){
 	const char s[2] = ",";
         int counter = 0;
 	int index = -1;
-	while(fscanf(file, "%s,", line)==1){
-		//printf("%s\n", line);
+	
+	// initialize head nodes
+	intnode* inthead = (intnode*)malloc(sizeof(intnode));
+	inthead = NULL;
+	floatnode* floathead = (floatnode*)malloc(sizeof(floatnode));
+	floathead = NULL;
+	strnode* strhead = (strnode*)malloc(sizeof(strnode));
+	strhead = NULL;
+	
+	int r = 0; // num rows
+
+	while(fscanf(file, "%s\n", line)==1){
 		const char s[2] = ",";
 		//char * token;
-		token = strtok(line,s);
+		
+		// tokenize a copy of line
+		char* linecpy = (char*)malloc(sizeof(line));
+		linecpy = strcpy(linecpy, line);
+
+		token = strtok(linecpy,s);
 		while(token!=NULL){
-			//printf("%s\n",token);
 			//token = trim(token); How to trim strings!?
 			if(strcmp(token, col)==0){ // first row
 				index = counter; // mark column as sorting column
@@ -30,13 +46,34 @@ int main(int argc, char** argv){
 					// if float
 					if(strstr(token, ".") != NULL){ // if string contains "."
 						// cast to float - atof
-						printf("float: %f\n", atof(token));
 
 						// make a float node and point it to line. then break
-
+						floatnode* node = (floatnode*)malloc(sizeof(floatnode));
+						node->row = strcpy((node->row), line);  // copy of line
+						node->next = floathead;
+						floathead = node;
+						free(node); // is this needed???
+						break; // move onto next row
 					}else{ // is int
 						// make a int node and point it to line. then break
+						intnode* node	= (intnode*)malloc(sizeof(intnode));
+                                                node->row = strcpy((node->row), line);  // copy of line
+                                                node->next = inthead;
+                                                inthead = node;
+                                                free(node); // is this needed???
+						break; // move onto next row
 					}
+				}else{ // just a string
+					strnode* node = (strnode*)malloc(sizeof(strnode));
+                                        node->data = (char*)malloc(sizeof(token));
+					node->data = strcpy(node->data, token);
+					
+					node->row = (char*)malloc(sizeof(line));
+					node->row = strcpy((node->row), line);  // copy of line
+                                        node->next = strhead;
+                                        strhead = node;
+                                        //free(node); // is this needed???
+					break;
 				}
 			}
 		token = strtok(NULL,s); // create next token
@@ -47,10 +84,33 @@ int main(int argc, char** argv){
 			return -1;
 		}
 		counter = 0;
+		r++;
 	}
 
-   	 free(line);
-    	free(token);
+	// sort w/ mergesort - have to fix this (change var names, add more mergesorts for type)
+		//mergesort(strhead);
+
+	// print LL
+
+	while(inthead != NULL){
+		printf("%d | %s\n", inthead->data, inthead->row);
+		inthead = inthead->next;
+	}
+
+	while(floathead != NULL){
+                floathead = floathead->next;
+        }
+	r--;
+	while(r > 0){
+		//printf("should be in here\n");
+		printf("%s | %s\n", strhead->data, strhead->row);
+               strhead	= strhead->next;
+        	r--;
+	}
+
+
+//   	free(line);
+  //  	free(token);
 
     	return 0;
 
