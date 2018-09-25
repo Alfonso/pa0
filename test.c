@@ -21,47 +21,69 @@ int main(int argc, char** argv){
 	floathead = NULL;
 	strnode* strhead = (strnode*)malloc(sizeof(strnode));
 	strhead = NULL;
+
+	const char s[2] = ",";
 	
 	while(fscanf(file, "%s\n", line)==1){
-		const char s[2] = ",";
 		
 		// tokenize col names + figure out index number
-		//while(token != NULL){}
-		 counter++; // increment counter
-
-
+		if (counter == 0){ // first row
+			char* linecpy = (char*)malloc(sizeof(line));
+			strcpy(linecpy, line);
+			token = strtok(linecpy, s);
+			while(token != NULL){
+				if(strcmp(token, col) == 0){
+					index = counter;
+					break;
+				}
+				token = strtok(NULL, s);
+				counter++; // increment counter
+			}
+		}
 
                 if(index == -1){ // column specified in command line NOT valid
                         printf("Error: Column does not exist in table\n");
                         return -1;
                 }
-                counter = 0;
+	}
+
+	// determine the type of sorting column
+		// use index found above, move past index - 1 commas
+		// if NOT number, you know it's string type. break
+			// need a helper function to determine whether it's a number
+		// if you get to the end of the column, it's a numeric
+
+
+	rewind(file);
 
 		// trim values (strs)
+	fscanf(file, "%s\n", line); // skip header line
+	char* firstLine = (char*)malloc(sizeof(line));
+	strcpy(firstLine, line); // copy headers into variable to use in output file later
 	
-		int i = 0;
-		int length = strlen(line);
-		for(i = 0; i < length; i++){
+	// put for loop in while fscanf loop
+	//while(fscanf(file, "%s\n", line)==1){}
+	int i = 0;
+	int length = strlen(line);
+	for(i = 0; i < length; i++){
 			
-			// if matching index (sorting column) 
-				// null checks
-				// add node to separate list
-				// add to back
-				// maintain head + tail ptrs
+		if(index == counter){ // if matching index (sorting column) 
+			// null checks
+			// add node to separate list
+			// add to back
+			// maintain head + tail ptrs
 			if(i < length - 1){ // check middle columns
 					
 			}else{ // check last col
 			}
-
+		}
 			// not null - str or float
 				// check if number
 					// add to LL as float 
 					// use atof()
 				// if not, string
-					// see previous test.c
-		}
-
-	}
+					// see previous test.c	
+	}	
 
 	// sort non null list  w/ mergesort - have to fix this (change var names, add more mergesorts for type)
 		//mergesort(strhead);
