@@ -24,70 +24,51 @@ int main(int argc, char** argv){
 	
 	while(fscanf(file, "%s\n", line)==1){
 		const char s[2] = ",";
-		//char * token;
 		
-		// tokenize a copy of line
-		char* linecpy = (char*)malloc(sizeof(line));
-		linecpy = strcpy(linecpy, line);
-		token = strtok(linecpy,s);
+		// tokenize col names + figure out index number
+		//while(token != NULL){}
+		 counter++; // increment counter
 
-		while(token!=NULL){
-			//token = trim(token); How to trim strings!?
-			if(strcmp(token, col)==0){ // first row
-				index = counter; // mark column as sorting column
-			}
-			else if(counter == index && strcmp(token, col)!=0){  // if sorting column
-				// if int or float, must cast back to correct type
-				
-				// if number
-				if(isdigit(token[0])){ // if first char is a digit
-					// if float
-					if(strstr(token, ".") != NULL){ // if string contains "."
-						// cast to float - atof
 
-						// make a float node and point it to line. then break
-						floatnode* node = (floatnode*)malloc(sizeof(floatnode));
-						node->data = atof(token);
-						node->row = (char*)malloc(sizeof(line));	
-						node->row = strcpy((node->row), line);  // copy of line
-						node->next = floathead;
-						floathead = node;
-						break; // move onto next row
-					}else{ // is int
-						// make a int node and point it to line. then break
-						intnode* node	= (intnode*)malloc(sizeof(intnode));
-                                                node->data = atoi(token);
-						node->row = (char*)malloc(sizeof(line));
-						node->row = strcpy((node->row), line);  // copy of line
-                                                node->next = inthead;
-                                                inthead = node;
-						break; // move onto next row
-					}
-				}else{ // just a string
-					strnode* node = (strnode*)malloc(sizeof(strnode));
-                                        node->data = (char*)malloc(sizeof(token));
-					node->data = strcpy(node->data, token);					
-					node->row = (char*)malloc(sizeof(line));
-					node->row = strcpy((node->row), line);  // copy of line
-                                        node->next = strhead;
-                                        strhead = node;
-					break; // move onto next row
-				}
+
+                if(index == -1){ // column specified in command line NOT valid
+                        printf("Error: Column does not exist in table\n");
+                        return -1;
+                }
+                counter = 0;
+
+		// trim values (strs)
+	
+		int i = 0;
+		int length = strlen(line);
+		for(i = 0; i < length; i++){
+			
+			// if matching index (sorting column) 
+				// null checks
+				// add node to separate list
+				// add to back
+				// maintain head + tail ptrs
+			if(i < length - 1){ // check middle columns
+					
+			}else{ // check last col
 			}
-		token = strtok(NULL,s); // create next token
-                counter++; // increment counter
+
+			// not null - str or float
+				// check if number
+					// add to LL as float 
+					// use atof()
+				// if not, string
+					// see previous test.c
 		}
-		if(index == -1){ // column specified in command line NOT valid
-			printf("Error: Column does not exist in table\n");
-			return -1;
-		}
-		counter = 0;
-		r++;
+
 	}
 
-	// sort w/ mergesort - have to fix this (change var names, add more mergesorts for type)
+	// sort non null list  w/ mergesort - have to fix this (change var names, add more mergesorts for type)
 		//mergesort(strhead);
-
+	
+	// add null list to front of sorted list
+	//
+	// write whole list into output file
 	// print LL (eventually change to creating output)
 	while(inthead != NULL){
 		//printf("%d | %s\n", inthead->data, inthead->row);
