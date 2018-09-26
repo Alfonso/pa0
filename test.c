@@ -56,42 +56,90 @@ int main(int argc, char** argv){
 
 	rewind(file);
 
-		// trim values (strs)
+		// trim values (strs) before adding to nodes!
+	
 	fscanf(file, "%s\n", line); // skip header line
 	char* firstLine = (char*)malloc(sizeof(line));
 	strcpy(firstLine, line); // copy headers into variable to use in output file later
 	
-	// put for loop in while fscanf loop
-	//while(fscanf(file, "%s\n", line)==1){}
-	int i = 0;
-	int length = strlen(line);
-	for(i = 0; i < length; i++){
-			
-		if(index == counter){ // if matching index (sorting column) 
-			// null checks
-			// add node to separate list
-			// add to back
-			// maintain head + tail ptrs
-			if(i < length - 1){ // check middle columns
-					
-			}else{ // check last col
-			}
-		}
-			// not null - str or float
-				// check if number
-					// add to LL as float 
-					// use atof()
-				// if not, string
-					// see previous test.c	
-	}	
-
-	// sort non null list  w/ mergesort - have to fix this (change var names, add more mergesorts for type)
-		//mergesort(strhead);
+	node* head = NULL; //(node*)malloc(sizeof(node));
 	
-	// add null list to front of sorted list
-	//
-	// write whole list into output file
-	// print LL (eventually change to creating output)
+	// put for loop in while fscanf loop
+	while(fscanf(file, "%s\n", line)==1){
+		int i = 0;
+		int commaCount = 0;
+		int isNull = 0;
+
+		node* nullHead = NULL;
+		int length = strlen(line);
+		for(i = 0; i < length; i++){
+			if(line[i] == ',') { commaCount++; }
+			if(index == commaCount){ // if matching index (sorting column) 
+				
+				// are currently at sorting column
+					// NULL CHECKS
+					// if i = 0 || i = length - 1: if current char is ',' --> null val
+					// if i > 0 && i < length - 1: if next char is a comma, it is null value
+
+				if(i == 0 || i == length - 1){ // first + last columns
+					if(line[i] == ','){
+						isNull = 1;
+					}
+				}else{ // check middle columns
+					if(line[i + 1] == ','){
+						isNull = 1;
+					}
+				}
+				if(isNull == 1){ // curr column has null val
+					// add node to separate list
+					// add to back
+					// maintain head + tail pointers
+					if(nullHead == NULL){
+						nullHead = (node*)malloc(sizeof(node));
+						nullHead->data = NULL;
+						nullHead->row = line;
+						nullHead->next = NULL;
+						ptr = nullHead;	
+					}else{
+						ptr->next = (node*)malloc(sizeof(node));
+						ptr->data = NULL;
+						ptr->row = line; // make sure this doesn't need malloc
+						ptr->next = NULL;
+						ptr = ptr->next;
+					}
+				}else{ // not null - str or float
+					// already know type from before
+					// add to generic node (just cast appropriately)
+					
+					// first: isolate current entry
+						 // from right after this comma to right before nxt one
+						// c substring?
+
+					// cast into node based on pre-determined type	
+					node* node = (node*)malloc(sizeof(node));
+                                        node->row = line; // make sure this doesn't need malloc
+
+					if(isNum){ // numeric
+						node->data = (char*)malloc(sizeof(item));
+					}else{ // string
+						node->data = (char*)malloc(sizeof(item));
+					}
+					node->next = head;
+                                        head = node;					
+					break; // go to next row
+				}			
+			}
+		}	
+	}
+
+
+		// sort non null list  w/ mergesort - have to fix this (change var names, add more mergesorts for type)
+			//mergesort(strhead);
+	
+		// add null list to front of sorted list
+	
+		// write whole list into output file
+		// print LL (eventually change to creating output)
 	while(inthead != NULL){
 		//printf("%d | %s\n", inthead->data, inthead->row);
 		printf("%d | %s\n", inthead->data, inthead->row);

@@ -8,13 +8,14 @@
 
 typedef struct _node{
 
-    char* data;
+    void* data;
     char* row; // ptr to string array of row in csv 
     struct _node* next; // ptr to next node in LL
     // row parent;
 
-}strnode;
+}node;
 
+/*
 typedef struct node_{
 
     int data;
@@ -32,6 +33,8 @@ typedef struct _node_{
     // row parent;
 
 }floatnode;
+*/
+
 
 // prototype function of the mergesort
 void mergesort_i(intnode**);
