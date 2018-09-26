@@ -23,22 +23,21 @@ int main(int argc, char** argv){
 	strhead = NULL;
 
 	const char s[2] = ",";
-	
+
+ 	// tokenize col names + figure out index number	
 	while(fscanf(file, "%s\n", line)==1){
 		
-		// tokenize col names + figure out index number
-		if (counter == 0){ // first row
-			char* linecpy = (char*)malloc(sizeof(line));
-			strcpy(linecpy, line);
-			token = strtok(linecpy, s);
-			while(token != NULL){
-				if(strcmp(token, col) == 0){
-					index = counter;
-					break;
-				}
-				token = strtok(NULL, s);
-				counter++; // increment counter
+		// first row only
+		char* linecpy = (char*)malloc(sizeof(line));
+		strcpy(linecpy, line);
+		token = strtok(linecpy, s);
+		while(token != NULL){
+			if(strcmp(token, col) == 0){
+				index = counter;
+				break;
 			}
+			token = strtok(NULL, s);
+			counter++; // increment counter
 		}
 
                 if(index == -1){ // column specified in command line NOT valid
@@ -47,17 +46,19 @@ int main(int argc, char** argv){
                 }
 	}
 
+
 	// determine the type of sorting column
 		// use index found above, move past index - 1 commas
-		// if NOT number, you know it's string type. break
+		// if NOT number (not comma or hyphen, or not isdigit()), you know it's string type. break
 			// need a helper function to determine whether it's a number
 		// if you get to the end of the column, it's a numeric
+		// set boolean isNum (0 or 1)
+
 
 
 	rewind(file);
 
-		// trim values (strs) before adding to nodes!
-	
+
 	fscanf(file, "%s\n", line); // skip header line
 	char* firstLine = (char*)malloc(sizeof(line));
 	strcpy(firstLine, line); // copy headers into variable to use in output file later
@@ -76,8 +77,7 @@ int main(int argc, char** argv){
 			if(line[i] == ',') { commaCount++; }
 			if(index == commaCount){ // if matching index (sorting column) 
 				
-				// are currently at sorting column
-					// NULL CHECKS
+				// NULL CHECKS
 					// if i = 0 || i = length - 1: if current char is ',' --> null val
 					// if i > 0 && i < length - 1: if next char is a comma, it is null value
 
@@ -90,6 +90,7 @@ int main(int argc, char** argv){
 						isNull = 1;
 					}
 				}
+
 				if(isNull == 1){ // curr column has null val
 					// add node to separate list
 					// add to back
@@ -113,16 +114,34 @@ int main(int argc, char** argv){
 					
 					// first: isolate current entry
 						 // from right after this comma to right before nxt one
-						// c substring?
+						// c substring: memcpy
 
-					// cast into node based on pre-determined type	
+					int numBytes = 0; // number of bytes of substring
+					int ptrOffset = i;
+					//i++;
+					while(line[i] != ',' || line[i] != '\0' /* if at last column */){
+						numBytes++;
+						i++;
+					}
+					char* item = (char*)malloc(sizeof(numBytes + 1)); // allocate extra byte for null char
+					memcpy(item, line + ptrOffset + 1, numBytes);
+					item[numBytes] = '\0'; // add null char end					
+
+
+					// cast into node based on pre-determined type
+						// need to malloc node differently based on type??	
 					node* node = (node*)malloc(sizeof(node));
-                                        node->row = line; // make sure this doesn't need malloc
+                                        node->row = line; // make sure this doesn't need malloc?
 
 					if(isNum){ // numeric
-						node->data = (char*)malloc(sizeof(item));
+						node->data = atof(item);
 					}else{ // string
-						node->data = (char*)malloc(sizeof(item));
+						 // trim values (strs) before adding to nodes 
+						item = trim(item); // make this helper function
+						node->data = item;
+						// if you need to malloc
+							//node->data = (char*)malloc(sizeof(item));
+							//strcpy(node->data, item);
 					}
 					node->next = head;
                                         head = node;					
@@ -133,9 +152,13 @@ int main(int argc, char** argv){
 	}
 
 
-		// sort non null list  w/ mergesort - have to fix this (change var names, add more mergesorts for type)
-			//mergesort(strhead);
-	
+		// sort non null list  w/ mergesort - have to fix this (change var names, make node data void type, make two comparators)
+			if(isStr){ // call with string comparator
+				mergesort(head, strcomparator);
+			}else{ // call with float/int comparator
+				mergesort(head, numcomparator);
+			}
+
 		// add null list to front of sorted list
 	
 		// write whole list into output file
