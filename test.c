@@ -15,15 +15,21 @@ int main(int argc, char** argv){
 	int index = -1;
 	
 	// initialize head nodes
-	intnode* inthead = (intnode*)malloc(sizeof(intnode));
+	/*
+ 	intnode* inthead = (intnode*)malloc(sizeof(intnode));
 	inthead = NULL;
 	floatnode* floathead = (floatnode*)malloc(sizeof(floatnode));
 	floathead = NULL;
 	strnode* strhead = (strnode*)malloc(sizeof(strnode));
 	strhead = NULL;
+	*/
+	node* head = (node*)malloc(sizeof(node));
+	head = NULL;
+	//const char s[2] = ",";
 
-	const char s[2] = ",";
-
+ 	node* nullHead = NULL;
+	node* ptr = (node*)malloc(sizeof(node));
+	ptr = NULL;
  	// tokenize col names + figure out index number	
 	while(fscanf(file, "%s\n", line)==1){
 		
@@ -41,6 +47,7 @@ int main(int argc, char** argv){
 		}
 
                 if(index == -1){ // column specified in command line NOT valid
+
                         printf("Error: Column does not exist in table\n");
                         return -1;
                 }
@@ -54,33 +61,30 @@ int main(int argc, char** argv){
 		// if you get to the end of the column, it's a numeric
 		// set boolean isNum (0 or 1)
 
-
+	int isNum = 0;
 
 	rewind(file);
 
 
 	fscanf(file, "%s\n", line); // skip header line
 	char* firstLine = (char*)malloc(sizeof(line));
-	strcpy(firstLine, line); // copy headers into variable to use in output file later
-	
-	node* head = NULL; //(node*)malloc(sizeof(node));
-	
+	strcpy(firstLine, line); // copy headers into variable to use in output file laterr
+
 	// put for loop in while fscanf loop
 	while(fscanf(file, "%s\n", line)==1){
 		int i = 0;
 		int commaCount = 0;
 		int isNull = 0;
 
-		node* nullHead = NULL;
 		int length = strlen(line);
 		for(i = 0; i < length; i++){
-			if(line[i] == ',') { commaCount++; }
+			if(i != 0 && line[i] == ',') { commaCount++; }
 			if(index == commaCount){ // if matching index (sorting column) 
-				
+				//printf("line: %s\n", line);
 				// NULL CHECKS
 					// if i = 0 || i = length - 1: if current char is ',' --> null val
 					// if i > 0 && i < length - 1: if next char is a comma, it is null value
-
+				
 				if(i == 0 || i == length - 1){ // first + last columns
 					if(line[i] == ','){
 						isNull = 1;
@@ -90,7 +94,7 @@ int main(int argc, char** argv){
 						isNull = 1;
 					}
 				}
-
+				
 				if(isNull == 1){ // curr column has null val
 					// add node to separate list
 					// add to back
@@ -98,16 +102,19 @@ int main(int argc, char** argv){
 					if(nullHead == NULL){
 						nullHead = (node*)malloc(sizeof(node));
 						nullHead->data = NULL;
-						nullHead->row = line;
+						nullHead->row = (char*)malloc(sizeof(line));
+						strcpy(nullHead->row, line);
 						nullHead->next = NULL;
 						ptr = nullHead;	
 					}else{
 						ptr->next = (node*)malloc(sizeof(node));
-						ptr->data = NULL;
-						ptr->row = line; // make sure this doesn't need malloc
-						ptr->next = NULL;
+						ptr->next->data = NULL;
+						ptr->next->row = (char*)malloc(sizeof(line));
+                                                strcpy(ptr->next->row, line);
+						ptr->next->next = NULL;
 						ptr = ptr->next;
 					}
+					break;
 				}else{ // not null - str or float
 					// already know type from before
 					// add to generic node (just cast appropriately)
@@ -115,36 +122,40 @@ int main(int argc, char** argv){
 					// first: isolate current entry
 						 // from right after this comma to right before nxt one
 						// c substring: memcpy
-
+					
 					int numBytes = 0; // number of bytes of substring
 					int ptrOffset = i;
-					//i++;
-					while(line[i] != ',' || line[i] != '\0' /* if at last column */){
+											
+					while(line[i] != ',' && line[i] != '\0' /* if at last colum */){
 						numBytes++;
 						i++;
 					}
+					
 					char* item = (char*)malloc(sizeof(numBytes + 1)); // allocate extra byte for null char
-					memcpy(item, line + ptrOffset + 1, numBytes);
+					memcpy(item, line + ptrOffset, numBytes);
 					item[numBytes] = '\0'; // add null char end					
-
 
 					// cast into node based on pre-determined type
 						// need to malloc node differently based on type??	
-					node* node = (node*)malloc(sizeof(node));
-                                        node->row = line; // make sure this doesn't need malloc?
+					node* temp = (node*)malloc(sizeof(node));
+					temp->row = (char*)malloc(sizeof(line));
+					strcpy(temp->row, line);
+					//temp->row = line; // make sure this doesn't need malloc?
 
 					if(isNum){ // numeric
-						node->data = atof(item);
+						//realloc(temp->data, sizeof(double));
+						float item_f = atof(item);
+						temp->data = &(item_f);
 					}else{ // string
 						 // trim values (strs) before adding to nodes 
-						item = trim(item); // make this helper function
-						node->data = item;
+						//item = trim(item); // make this helper function
+						
 						// if you need to malloc
-							//node->data = (char*)malloc(sizeof(item));
-							//strcpy(node->data, item);
+						temp->data = item;
 					}
-					node->next = head;
-                                        head = node;					
+					temp->next = head;
+                                        head = temp;
+
 					break; // go to next row
 				}			
 			}
@@ -152,23 +163,42 @@ int main(int argc, char** argv){
 	}
 
 
+/*
 		// sort non null list  w/ mergesort - have to fix this (change var names, make node data void type, make two comparators)
 			if(isStr){ // call with string comparator
 				mergesort(head, strcomparator);
 			}else{ // call with float/int comparator
 				mergesort(head, numcomparator);
 			}
-
+*/
 		// add null list to front of sorted list
 	
 		// write whole list into output file
 		// print LL (eventually change to creating output)
-	while(inthead != NULL){
+	
+	/*
+	while(head != NULL){
 		//printf("%d | %s\n", inthead->data, inthead->row);
-		printf("%d | %s\n", inthead->data, inthead->row);
-		inthead = inthead->next;
+		printf("%s | %s\n", (char*)(head->data), head->row);
+		head = head->next;
+	}
+	printf("\n");
+	while(nullHead != NULL){
+		printf("%s | %s\n", (nullHead->data), nullHead->row);
+                nullHead = nullHead->next;
+	}
+	*/
+	
+	if(nullHead != NULL){
+		ptr->next = head;
 	}
 
+	 while(nullHead != NULL){
+                printf("%s | %s\n", (nullHead->data), nullHead->row);
+                nullHead = nullHead->next;
+        }
+
+/*
 	while(floathead != NULL){
         	printf("%f | %s\n", floathead->data, floathead->row);
 	        floathead = floathead->next;
@@ -178,7 +208,7 @@ int main(int argc, char** argv){
 		printf("%s | %s\n", strhead->data, strhead->row);
         	strhead	= strhead->next;
 	}
-
+	*/
 
 //   	free(line);
   //  	free(token);

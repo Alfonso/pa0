@@ -35,10 +35,11 @@ typedef struct _node_{
 }floatnode;
 */
 
-
+/*
 // prototype function of the mergesort
 void mergesort_i(intnode**);
 
 void mergesort_f(floatnode**);
 
 void mergesort_s(strnode**);
+*/
