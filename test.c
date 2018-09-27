@@ -25,7 +25,6 @@ int main(int argc, char** argv){
 	*/
 	node* head = (node*)malloc(sizeof(node));
 	head = NULL;
-	//const char s[2] = ",";
 
  	node* nullHead = NULL;
 	node* ptr = (node*)malloc(sizeof(node));
@@ -53,18 +52,37 @@ int main(int argc, char** argv){
                 }
 	}
 
-
+	
 	// determine the type of sorting column
 		// use index found above, move past index - 1 commas
 		// if NOT number (not comma or hyphen, or not isdigit()), you know it's string type. break
 			// need a helper function to determine whether it's a number
 		// if you get to the end of the column, it's a numeric
 		// set boolean isNum (0 or 1)
+	
+	int isNum = 1;
+	while(fscanf(file, "%s\n", line)==1){
+                int i = 0;
+                int commaCount = 0;
+                int isNull = 0;
 
-	int isNum = 0;
+                int length = strlen(line);
+                for(i = 0; i < length; i++){
+                        if(i != 0 && line[i] == ',') { commaCount++; }
+                        if(index == commaCount){ // if matching index (sorting column) 
+				// check if null
+				// if not, isolate item
+					// check if there are any non digits. - and . are ok
+					// if so, set isNum to 0 and break
+					// if you get to the end of the word with no bad chars, break
+
+			}	
+		}
+		if(isNum == 0){ break; }
+	}
+
 
 	rewind(file);
-
 
 	fscanf(file, "%s\n", line); // skip header line
 	char* firstLine = (char*)malloc(sizeof(line));
@@ -191,12 +209,16 @@ int main(int argc, char** argv){
 	
 	if(nullHead != NULL){
 		ptr->next = head;
+		while(nullHead != NULL){
+                	printf("%s | %s\n", (nullHead->data), nullHead->row);
+                	nullHead = nullHead->next;
+        	}
+	}else{
+		while(head != NULL){
+                	printf("%s | %s\n", (head->data), head->row);
+                	head = head->next;
+        	}
 	}
-
-	 while(nullHead != NULL){
-                printf("%s | %s\n", (nullHead->data), nullHead->row);
-                nullHead = nullHead->next;
-        }
 
 /*
 	while(floathead != NULL){
