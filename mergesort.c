@@ -4,7 +4,7 @@
 
 void splitHalf(node*,node**,node**);
 
-node* combineList(node*,node*,int);
+node* combineList(node*,node*,int(*)(void*,void*));
 
 void pTraverse(node*);
 
