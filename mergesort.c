@@ -14,11 +14,15 @@ void cleanList(node*);
 void addToFront(node**,char*,int);
 
 int comparator_FLT(void* data0,void* data1){
-    return *((float*) data1) - *((float*)data0);
+    float* d0 = (float*) data0;    
+    float* d1 = (float*) data1;
+    return *d1 - *d0;
 }
 
 int comparator_STR(void* data0,void* data1){
-    return strcmp(*((char*)data1), *((char*)data0));
+    char* d0 = (char*)data0;
+    char* d1 = (char*)data1;
+    return strcmp(*d1, *d0);
 }
 
 /*
