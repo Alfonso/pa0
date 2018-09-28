@@ -1,8 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <mergesort.h>
+#include "mergesort.h"
 #include <time.h>
+
+// returns 0 if it is an int / float
+// returns 1 if it is a string
+int isNotString(char* str){
+    
+    return 0;
+}
 
 node* makeStruct(FILE *file, char* column){
 

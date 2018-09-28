@@ -1,11 +1,11 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
-//#include "simpleCSVsorter.h"
+#include "simpleCSVsorter.h"
 
 void splitHalf(node*,node**,node**);
 
-node* combineList(node*,node*);
+node* combineList(node*,node*,int);
 
 void pTraverse(node*);
 
@@ -13,8 +13,10 @@ void cleanList(node*);
 
 void addToFront(node**,char*,int);
 
+/*
 // testing to see if the sorting works
 int main(int argc,char** argv){
+
     node* front = (node*) malloc(1*sizeof(node));
     addToFront(&front,"100",0);
     addToFront(&front,"150",1);
@@ -28,8 +30,10 @@ int main(int argc,char** argv){
     printf("After sorted: ");
     pTraverse(front);
     cleanList(front);
-    return 0;
+   
+     return 0;
 }
+*/
 
 // each "node" has a refernce to the attribute that will
 // be compared to each other. It also has a reference to
@@ -38,7 +42,7 @@ int main(int argc,char** argv){
 // information in that row. This will be used to easily
 // output the information after sorting
 
-void mergesort(node** head){
+void mergesort(node** head,int (*comparatorFnPtr)(void*,void*)){
 
     // we have to assume that there are no negative
     // numbers in order to easily lexlexicographicly sort
@@ -103,7 +107,7 @@ void splitHalf(node* head,node** a,node** b){
 // this combines two sorted lists together and
 // returns a newly sorted list
 // it is done recursively
-node* combineList(node* list1,node*list2){
+node* combineList(node* list1,node*list2,int (*comparatorFnPtr)(void*,void*)){
     // new front node of the combined list
     node* newFront; 
     
@@ -114,7 +118,7 @@ node* combineList(node* list1,node*list2){
             return list1;
     
     // compare the data
-    if( strcmp(list1->data,list2->data) <= 0 ){
+    if( comparatorFnPtr(list1->data,list2->data) > 0 ){
         newFront = list1;
         newFront->next = combineList(list1->next,list2);
     }else{

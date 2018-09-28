@@ -11,35 +11,15 @@ typedef struct _node{
     void* data;
     char* row; // ptr to string array of row in csv 
     struct _node* next; // ptr to next node in LL
-    // row parent;
 
 }node;
 
-/*
-typedef struct node_{
+// return > 0 ---> then data1 > data0
+// return < 0 ---> then data1 < data0
+// return == 0 ---> then data1 == data0
+int comparator_FLT(void*,void*);
 
-    int data;
-    char* row; // ptr to string	array of row in	csv
-    struct node_* next;
-    // row parent;
+int comparator_STR(void*,void*);
 
-}intnode;
-
-typedef struct _node_{
-
-    float data;
-    char* row; // ptr to string
-    struct _node_* next;
-    // row parent;
-
-}floatnode;
-*/
-
-/*
 // prototype function of the mergesort
-void mergesort_i(intnode**);
-
-void mergesort_f(floatnode**);
-
-void mergesort_s(strnode**);
-*/
+void mergesort(node**,int);
