@@ -13,6 +13,14 @@ void cleanList(node*);
 
 void addToFront(node**,char*,int);
 
+int comparator_FLT(void* data0,void* data1){
+    return *((float*) data1) - *((float*)data0);
+}
+
+int comparator_STR(void* data0,void* data1){
+    return strcmp(*((char*)data1) - *((char*)data0));
+}
+
 /*
 // testing to see if the sorting works
 int main(int argc,char** argv){
