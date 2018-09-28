@@ -6,6 +6,9 @@
 
 int main(int argc, char** argv){
 
+	if(argc != 3){ 
+		printf("Bad input - wrong number of input strings.\n");
+	}
 	FILE *file = fopen(argv[1], "r");
 	char *col = argv[2];
 	char* line = (char*)malloc(1000000*(sizeof(char)));
@@ -14,15 +17,6 @@ int main(int argc, char** argv){
         int counter = 0;
 	int index = -1;
 	
-	// initialize head nodes
-	/*
- 	intnode* inthead = (intnode*)malloc(sizeof(intnode));
-	inthead = NULL;
-	floatnode* floathead = (floatnode*)malloc(sizeof(floatnode));
-	floathead = NULL;
-	strnode* strhead = (strnode*)malloc(sizeof(strnode));
-	strhead = NULL;
-	*/
 	node* head = (node*)malloc(sizeof(node));
 	head = NULL;
 
@@ -218,7 +212,7 @@ int main(int argc, char** argv){
 
 
 		// sort non null list  w/ mergesort - have to fix this (change var names, make node data void type, make two comparators)
-			if(isStr){ // call with string comparator
+			if(isNum == 0){ // call with string comparator
 				mergesort(&head, comparator_STR);
 			}else{ // call with float/int comparator
 				mergesort(&head, comparator_FLT);
