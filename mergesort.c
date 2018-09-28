@@ -22,7 +22,7 @@ int comparator_FLT(void* data0,void* data1){
 int comparator_STR(void* data0,void* data1){
     char* d0 = (char*)data0;
     char* d1 = (char*)data1;
-    return strcmp(*d1, *d0);
+    return strcmp(d1, d0);
 }
 
 /*
