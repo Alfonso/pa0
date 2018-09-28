@@ -22,4 +22,4 @@ int comparator_FLT(void*,void*);
 int comparator_STR(void*,void*);
 
 // prototype function of the mergesort
-void mergesort(node**,int);
+void mergesort(node**,int(*)(void*,void*));
