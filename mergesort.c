@@ -58,12 +58,12 @@ void mergesort(node** head,int (*comparatorFnPtr)(void*,void*)){
     // split the list and fill l1 and l2
     splitHalf(*head,&l1,&l2);
     // sort l1
-    mergesort(&l1);
+    mergesort(&l1,comparatorFnPtr);
     // sort l2
-    mergesort(&l2);
+    mergesort(&l2,comparatorFnPtr);
     
     //merge l1 and l2
-    *head = combineList(l1,l2);
+    *head = combineList(l1,l2,comparatorFnPtr);
 
     return;
 
@@ -120,10 +120,10 @@ node* combineList(node* list1,node*list2,int (*comparatorFnPtr)(void*,void*)){
     // compare the data
     if( comparatorFnPtr(list1->data,list2->data) > 0 ){
         newFront = list1;
-        newFront->next = combineList(list1->next,list2);
+        newFront->next = combineList(list1->next,list2,comparatorFnPtr);
     }else{
         newFront = list2;
-        newFront->next = combineList(list1,list2->next);
+        newFront->next = combineList(list1,list2->next,comparatorFnPtr);
     }
 
     return newFront;
