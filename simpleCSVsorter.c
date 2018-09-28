@@ -3,13 +3,100 @@
 #include <string.h>
 #include "simpleCSVsorter.h"
 #include "mergesort.c"
+#define MAXBUFFER 1000000
+
+char* trim(char*);
+
+int countNonWhite(char*);
+
+int indexOfLastNon(char*);
+
+char* trim(char* strPtr){
+    char* str = strPtr;
+    // keep track of the last non-white character
+    int lastNonWhite = indexOfLastNon(str);
+    int charCount = countNonWhite(str);
+    char* temp = (char*) malloc((charCount+1)*sizeof(char));
+    int index = 0; // keep track of curr index
+    int oldCount = 0; // keep track of index in old string
+    // trim leading white-spaces
+    while(*str == ' '){
+        str++;
+        oldCount++;
+    }
+
+    while( oldCount < lastNonWhite ){
+        temp[index] = *str;
+        index++;
+        oldCount++;
+        str++;
+    }
+    temp[index] = '\0';
+
+    return temp;
+}
+
+int indexOfLastNon(char* str){
+    int counter = strlen(str)-1;
+    char* end = str + strlen(str) - 1;
+    while( *end == ' '){
+        counter--;
+        end--;
+    }
+
+    return counter+1;
+}
+
+int countNonWhite(char* str){
+    int counter=0;
+    char* ptr = str;
+    while( *ptr != '\0' ){
+        if( *ptr != ' ' )
+            counter++;
+        ptr++;
+    }
+
+    return counter;
+}
+
+node* addToNull(node** nullHeadPtr, char** rowPtr){
+	node* ptr = *nullHeadPtr;
+	if(*nullHeadPtr == NULL){
+        	*nullHeadPtr = (node*)malloc(sizeof(node));
+        	(*nullHeadPtr)->data = NULL;
+        	(*nullHeadPtr)->row = (char*)malloc(sizeof(*rowPtr));
+        	strcpy((*nullHeadPtr)->row, *rowPtr);
+        	(*nullHeadPtr)->next = NULL;
+		return *nullHeadPtr;
+        }else{
+		while((*nullHeadPtr)->next != NULL){
+			ptr = ptr->next;
+		}
+        	ptr->next = (node*)malloc(sizeof(node));
+        	ptr->next->data = NULL;
+                ptr->next->row = (char*)malloc(sizeof(*rowPtr));
+               	strcpy(ptr->next->row, *rowPtr);
+                ptr->next->next = NULL;
+		return *nullHeadPtr;
+        }
+}
+
+int isNum(char** item){
+	int j = 0;
+	for(j = 0; j < strlen(*item); j++){
+        	if((*item)[j] != '.' && (*item)[j] != '-' && !isdigit((*item)[j])){
+             	   return 0;
+                }
+        }
+	return 1;
+}
 
 int main(int argc, char** argv){
 
 	if(argc != 3){ 
 		printf("Bad input - wrong number of input strings.\n");
 	}
-	FILE *file = fopen(argv[1], "r");
+	//FILE *file = fopen(stdin, "r");
 	char *col = argv[2];
 	char* line = (char*)malloc(1000000*(sizeof(char)));
 	char* token = (char*)malloc(1000000*(sizeof(char)));
@@ -23,28 +110,35 @@ int main(int argc, char** argv){
  	node* nullHead = NULL;
 	node* ptr = (node*)malloc(sizeof(node));
 	ptr = NULL;
- 	// tokenize col names + figure out index number	
-	while(fscanf(file, "%s\n", line)==1){
-		
-		// first row only
-		char* linecpy = (char*)malloc(sizeof(line));
-		strcpy(linecpy, line);
-		token = strtok(linecpy, s);
-		while(token != NULL){
-			if(strcmp(token, col) == 0){
-				index = counter;
-				break;
-			}
-			token = strtok(NULL, s);
-			counter++; // increment counter
+ 	// tokenize col names + figure out index number
+ 	
+	// first row only	
+	fgets(line,MAXBUFFER,stdin);
+	
+	// remove the new line
+	int len = strlen(line);
+	if(line[len-1] == '\n')
+		line[len-1] = '\0';
+	
+	char* linecpy = (char*)malloc(sizeof(line));
+	strcpy(linecpy, line);
+	
+	char* firstLine = (char*)malloc(sizeof(line));
+        strcpy(firstLine, line); // copy headers into variable to use in output file laterr
+
+	token = strtok(linecpy, s);
+	while(token != NULL){
+		if(strcmp(token, col) == 0){
+			index = counter;
+			break;
 		}
-
-                if(index == -1){ // column specified in command line NOT valid
-
-                        printf("Error: Column does not exist in table\n");
-                        return -1;
-                }
+		token = strtok(NULL, s);
+		counter++; // increment counter
 	}
+        if(index == -1){ // column specified in command line NOT valid
+        	printf("Error: Column does not exist in table\n");
+                return -1;
+        }
 
 	
 	// determine the type of sorting column
@@ -53,211 +147,168 @@ int main(int argc, char** argv){
 			// need a helper function to determine whether it's a number
 		// if you get to the end of the column, it's a numeric
 		// set boolean isNum (0 or 1)
-	rewind(file);
-	fscanf(file, "%s\n", line);	
-	int isNum = 1;
-	while(fscanf(file, "%s\n", line)==1){
+
+
+	int isNum_ = 1;
+	while(fgets(line,MAXBUFFER,stdin) != NULL){
+		// remove the \n if it is there
+		int len = strlen(line);
+        	if(line[len-1] == '\n')
+                	line[len-1] = '\0';
                 int i = 0;
                 int commaCount = 0;
+		int isNull = 0;
 
                 int length = strlen(line);
                 for(i = 0; i < length; i++){
-                        if(i != 0 && line[i] == ',') { commaCount++; }
+			if(index == 0){
+				// deal w it separately 
+				if(line[0] == ',' || line[0]== '\0'){
+					// this means that the column is null
+					// have to make the null node
+					nullHead = addToNull(&nullHead, &line);					
+				}else{
+					// add to the regular linked list
+					int numBytes = 0; // number of bytes of substring
+                                	int ptrOffset = i;
+
+                                	if(line[i] == ','){
+                                        	i++;
+                                      		ptrOffset++;
+                                	}
+                                	while(line[i] != ',' && line[i] != '\0' /* if at last column */){
+                                        	numBytes++;
+                                        	i++;
+                                	}
+
+                                	char* item = (char*)malloc(sizeof(numBytes + 1)); // allocate extra byte for null char
+                                	memcpy(item, line + ptrOffset, numBytes);
+                                	item[numBytes] = '\0'; // add null char end
+					
+					item = trim(item);
+
+                                	// add to LL
+                                	node* temp = (node*)malloc(sizeof(node));
+                                	temp->row = (char*)malloc(sizeof(line));
+                                	strcpy(temp->row, line);
+                                	temp->data = item;
+
+                                	temp->next = head;
+                                	head = temp;
+
+                                	// check if item has any non-num chars
+                                	isNum_ = isNum_ & isNum(&item);
+				}
+				break;
+			}
+			if(line[i] == ',') { commaCount++; }
                         if(index == commaCount){ // if matching index (sorting column) 
 				// check if null
 				// if not, isolate item
 					// check if there are any non digits. - and . are ok
 					// if so, set isNum to 0 and break
 					// if you get to the end of the word with no bad chars, break
+				
+				// NULL CHECKS
+					// if i = 0 || i = length - 1: if current char is ',' --> null val
+					// if i > 0 && i < length - 1: if next char is a comma, it is null value
 				 
-				if(i == 0 || i == length - 1){ // first + last columns
-                                        if(line[i] == ','){
-                                                break; // it is null, so break to next line
-                                        }
-                                 }else{ // check middle columns
-                                        if(line[i + 1] == ','){
-                                                break; // it is null, so break to next line
-                                        }
-                                 }
-			
+				if(i < length - 1){ // first + middle columns
+                                        if(line[i + 1] == ','){ // it is null, so add to null list	
+						nullHead = addToNull(&nullHead, &line);
+						break;
+					}
+				}else{ // check end column
+					if(line[i + 1] == '\0'){
+						nullHead = addToNull(&nullHead, &line);
+						break;
+					}
+				}	
+     
 				// if NOT null
 				int numBytes = 0; // number of bytes of substring
                                 int ptrOffset = i;
-
-                                while(line[i] != ',' && line[i] != '\0' /* if at last colum */){
+				
+				if(line[i] == ','){ 
+					i++;
+					ptrOffset++;				
+				}
+                                while(line[i] != ',' && line[i] != '\0' /* if at last column */){
                                 	numBytes++;
                                         i++;
                                 }
 
-                                char* item = (char*)malloc(sizeof(numBytes + 1)); // allocate extra byte for null char
-                                memcpy(item, line + ptrOffset, numBytes);
-                               	item[numBytes] = '\0'; // add null char end                                     
+                               	char* item = (char*)malloc(sizeof(numBytes + 1)); // allocate extra byte for null char
+                               	memcpy(item, line + ptrOffset, numBytes);
+                           	item[numBytes] = '\0'; // add null char end                                     
 
-				// check if item has any bad chars
-				int j = 0;
-				for(j = 0; j < strlen(item); j++){
-					if(item[j] != '.' && item[j] != '-' && !isdigit(item[j])){
-						isNum = 0;
-						break;
-					}
-				}
-			}	
-		}
-		if(isNum == 0){ break; }
-	}
-
-
-	rewind(file);
-
-	fscanf(file, "%s\n", line); // skip header line
-	char* firstLine = (char*)malloc(sizeof(line));
-	strcpy(firstLine, line); // copy headers into variable to use in output file laterr
-
-	// put for loop in while fscanf loop
-	while(fscanf(file, "%s\n", line)==1){
-		int i = 0;
-		int commaCount = 0;
-		int isNull = 0;
-
-		int length = strlen(line);
-		for(i = 0; i < length; i++){
-			if(i != 0 && line[i] == ',') { commaCount++; }
-			if(index == commaCount){ // if matching index (sorting column) 
-				//printf("line: %s\n", line);
-				// NULL CHECKS
-					// if i = 0 || i = length - 1: if current char is ',' --> null val
-					// if i > 0 && i < length - 1: if next char is a comma, it is null value
+				// add to LL
+				node* temp = (node*)malloc(sizeof(node));
+                                temp->row = (char*)malloc(sizeof(line));
+                                strcpy(temp->row, line);
+				temp->data = item;
 				
-				if(i == 0 || i == length - 1){ // first + last columns
-					if(line[i] == ','){
-						isNull = 1;
-					}
-				}else{ // check middle columns
-					if(line[i + 1] == ','){
-						isNull = 1;
-					}
-				}
-				
-				if(isNull == 1){ // curr column has null val
-					// add node to separate list
-					// add to back
-					// maintain head + tail pointers
-					if(nullHead == NULL){
-						nullHead = (node*)malloc(sizeof(node));
-						nullHead->data = NULL;
-						nullHead->row = (char*)malloc(sizeof(line));
-						strcpy(nullHead->row, line);
-						nullHead->next = NULL;
-						ptr = nullHead;	
-					}else{
-						ptr->next = (node*)malloc(sizeof(node));
-						ptr->next->data = NULL;
-						ptr->next->row = (char*)malloc(sizeof(line));
-                                                strcpy(ptr->next->row, line);
-						ptr->next->next = NULL;
-						ptr = ptr->next;
-					}
-					break;
-				}else{ // not null - str or float
-					// already know type from before
-					// add to generic node (just cast appropriately)
-					
-					// first: isolate current entry
-						 // from right after this comma to right before nxt one
-						// c substring: memcpy
-					
-					int numBytes = 0; // number of bytes of substring
-					int ptrOffset = i;
-				        
-					if(i > 0 && line[i] == ','){ 
-						i++; 
-						ptrOffset++;
-					}							
-					while(line[i] != ',' && line[i] != '\0' /* if at last colum */){
-						numBytes++;
-						i++;
-					}
-					
-					char* item = (char*)malloc(sizeof(numBytes + 1)); // allocate extra byte for null char
-					memcpy(item, line + ptrOffset, numBytes);
-					item[numBytes] = '\0'; // add null char end					
+				temp->next = head;
+                                head = temp;
 
-					// cast into node based on pre-determined type
-						// need to malloc node differently based on type??	
-					node* temp = (node*)malloc(sizeof(node));
-					temp->row = (char*)malloc(sizeof(line));
-					strcpy(temp->row, line);
-					//temp->row = line; // make sure this doesn't need malloc?
-
-					if(isNum == 1){ // numeric
-						float* ptr = (float*)malloc(sizeof(float));
-						temp->data = ptr;
-						*ptr = atof(item);
-					}else{ // string
-						 // trim values (strs) before adding to nodes 
-						//item = trim(item); // make this helper function
-						
-						// if you need to malloc
-						temp->data = item;
-					}
-					temp->next = head;
-                                        head = temp;
-
-					break; // go to next row
-				}			
+				// check if item has any non-num chars
+				isNum_ = isNum_ & isNum(&item);
+				i = length;
+				break;
 			}
 		}	
 	}
+		// if type is numeric, cast to float
+		node* ptr2 = head;
+		node* floatHead = NULL;
+		if(isNum_ == 1){
+			while(ptr2 != NULL){
+				char* str = ptr2->data;
+				char* row = ptr2->row;
+				float val = atof(str);	
+				
+				node* temp_f = (node*)malloc(sizeof(node));
+				float* floatPtr = (float*)malloc(sizeof(float));
+				temp_f->data = floatPtr;
 
+				temp_f->row = ptr2->row;
+				*floatPtr = val;
 
-
+				//printf("val: %f\n",val);
+				temp_f->next = floatHead;
+				floatHead = temp_f;
+				ptr2 = ptr2->next;
+			}
+			head = floatHead;
+		}
+		
 		// sort non null list  w/ mergesort - have to fix this (change var names, make node data void type, make two comparators)
-			if(isNum == 0){ // call with string comparator
+			if(isNum_ == 0){ // call with string comparator
 				mergesort(&head, comparator_STR);
 			}else{ // call with float/int comparator
 				mergesort(&head, comparator_FLT);
 			}
+
 		// add null list to front of sorted list
 	
 		// write whole list into output file
 		// print LL (eventually change to creating output)
 	
-	
+	printf("%s\n", firstLine); // print columns
 	if(nullHead != NULL){
+		ptr = nullHead;
+		while(ptr->next != NULL){ ptr = ptr->next; }
 		ptr->next = head;
 		while(nullHead != NULL){
-			if(isNum){
-				printf("%f | %s\n", *(float*)(nullHead->data), nullHead->row);
-			}else{
-				printf("%s | %s\n", (nullHead->data), nullHead->row);
-			}
+			printf("%s\n", nullHead->row);
                 	nullHead = nullHead->next;
         	}
 	}else{
 		while(head != NULL){
-                	if(isNum){
-                                printf("%f | %s\n", *(float*)(head->data), head->row);
-                        }else{
-                                printf("%s | %s\n", (head->data), head->row);
-                        }
+                        printf("%s\n", head->row);
 			head = head->next;
         	}
 	}
-
-/*
-	while(floathead != NULL){
-        	printf("%f | %s\n", floathead->data, floathead->row);
-	        floathead = floathead->next;
-        }
-	while(strhead != NULL){
-		//printf("should be in here\n");
-		printf("%s | %s\n", strhead->data, strhead->row);
-        	strhead	= strhead->next;
-	}
-	*/
-
-//   	free(line);
-  //  	free(token);
 
     	return 0;
 
