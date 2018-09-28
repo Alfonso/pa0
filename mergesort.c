@@ -18,7 +18,7 @@ int comparator_FLT(void* data0,void* data1){
 }
 
 int comparator_STR(void* data0,void* data1){
-    return strcmp(*((char*)data1) - *((char*)data0));
+    return strcmp(*((char*)data1), *((char*)data0));
 }
 
 /*
