@@ -1,4 +1,4 @@
-// this struct is a node that only contains comparing data
+/ this struct is a node that only contains comparing data
 //***UPDATE** - these are the different types of nodes we can have
 	// it seems like the columns can come in any order, so we need a next field for any of the possible types (string, int, float)
 	// we will make a 2D array of nodes

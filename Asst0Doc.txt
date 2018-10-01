@@ -1,0 +1,39 @@
+Systems Programming Fall 2018 Assignment 0 Documentation
+
+Design
+
+After checking that there are three command line arguments and a valid file from stdin (and returning an error if not), we checked the line containing the column headers for the column specified in the command line. We tokenized the first line and cycled through it. In each loop, we increment a counter that initialized to -1. This serves to index the column. If we found the column, we break from the loop. If we reach the end of the loop and the counter is still at -1, the command line argument does not exist in the CSV file, and an error is returned. 
+
+Now we will loop through each of the remaining lines in the file. We will use the index value found in the previous section and a counter value keeping track of the number of commas to get to the sorting column in each row. Once the two variables are equal, we can check the column for a null or valid value. If null, we add a node to a linked list meant for null nodes. If not, we put the data as a string into a linked list meant to be sorted. We also check the type. If any character in it is not a hyphen, period, or digit, we assume the type is string. 
+
+By the end of this loop, we know the type of the column and have two linked lists set up. Now, if the type is numeric, we make a copy of the linked list and instead save all the data as floats instead of strings. Then we reassign the head of the old list to the new list.
+
+Now we send the list to be sorted to our mergesort algorithm with a string comparator if it is of type string and with a float comparator if it is of type int or float.
+
+Next, we check if the null list exists. If it does, we append the sorted list to the end of the null list and make the head of the null list the new head. Then we print the columns headers and traverse the list, printing each row.
+
+Testing Procedure
+
+We knew from the beginning that we wanted to make a generic CSV sorter, so we started testing with a small custom CSV. We set it up with three columns with all different types: string, int, and float. This was to make sure that all types of data could be sorted by our algorithm. Then we made some columns null and checked that our code could handle sorting null data. Next, we ran the given CSV file. We tried different columns to ensure that it worked with different types. 
+
+Assumptions
+
+We assumed that the only possible types are string, int, and float. 
+If an entry includes commas, it is surrounded by quotes.
+
+Difficulties 
+
+We had to figure out how to correctly cast the data we were sorting on to the correct type. We resolved this by using generic pointers. 
+It was hard to find how we were allocating memory improperly. 
+
+
+Header File
+
+Node struct
+The nodes we used to store information had three fields: a void pointer, a character pointer, and a next field of type node. 
+String comparator
+This is meant to compare strings for our mergesort function. We put the function prototype for our mergesort function in our header file.
+Int comparator	
+This is meant to compare integers for our mergesort function. We put the function prototype for our mergesort function in our header file.
+Mergesort
+We put the function prototype for our mergesort function in our header file.
