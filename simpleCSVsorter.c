@@ -1,37 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include "simpleCSVsorter.h"
 #include "mergesort.c"
-
-
-
-/*
-char* trim(char* strPtr){
-    char* str = strPtr;
-    // keep track of the last non-white character
-    int lastNonWhite = indexOfLastNon(str);
-    int charCount = countNonWhite(str);
-    char* temp = (char*) malloc((charCount+1)*sizeof(char));
-    int index = 0; // keep track of curr index
-    int oldCount = 0; // keep track of index in old string
-    // trim leading white-spaces
-    while(*str == ' '){
-        str++;
-        oldCount++;
-    }
-
-    while( oldCount < lastNonWhite ){
-        temp[index] = *str;
-        index++;
-        oldCount++;
-        str++;
-    }
-    temp[index] = '\0';
-
-    return temp;
-}
-*/
 
 int trim(char** strPtr){
     // dereference the ptr
@@ -129,7 +101,9 @@ int isNum(char** item){
 int main(int argc, char** argv){
 
 	if(argc != 3){ 
-		printf("Bad input - wrong number of input strings.\n");
+		errno = 5;
+		perror("Incorrect number of arguments");
+		return -1;
 	}
 	//FILE *file = fopen(stdin, "r");
 	char *col = argv[2];
@@ -151,7 +125,11 @@ int main(int argc, char** argv){
     size_t n= 0;
 
 	// first row only	
-	getline(&line,&n,stdin);
+	int exists = getline(&line,&n,stdin);
+	
+	if(exists == -1){
+		return -1;	
+	}
 	// remove the new line
 	int len = strlen(line);
 	if(line[len-1] == '\n')
@@ -174,7 +152,8 @@ int main(int argc, char** argv){
 		counter++; // increment counter
 	}
     if(index == -1){ // column specified in command line NOT valid
-        printf("Error: Column does not exist in table\n");
+        errno = 5;
+	perror("Column does not exist");
         return -1;
     }
 
@@ -186,17 +165,13 @@ int main(int argc, char** argv){
 	// if you get to the end of the column, it's a numeric
 	// set boolean isNum (0 or 1)
 
-    //int counter_ = 0;
 	int isNum_ = 1;
 	while(getline(&line,&n,stdin) != -1){
-	    //printf("%d:\n",counter_);
-        //counter_++;
 	
         // remove the \n if it is there
 		int len = strlen(line);
         if(line[len-1] == '\n'){
             line[len-1] = '\0';
-            //printf("removed new line\n");
         }
         int i = 0;
         int commaCount = 0;
@@ -299,7 +274,6 @@ int main(int argc, char** argv){
                     numBytes++;
                     i++;
                 }
-                //printf("Pre-node creation\n");
                 char* tempItem = (char*)malloc(sizeof(char)*(numBytes+1)); // Allocating an extra byte for the null character
                 char* item; // allocate extra byte for null char
                 memcpy(tempItem, line + ptrOffset, numBytes);
