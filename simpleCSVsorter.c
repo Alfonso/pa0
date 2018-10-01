@@ -48,7 +48,7 @@ int trim(char** strPtr){
     // and then start copying over the chars from the original
     // to the temp char*. This getting rid of the white spaces
     // at the beginning of the original char*
-    while(*ptr == ' '){
+    while(*ptr == ' ' || *ptr == '"'){
         ptr++;
         oldCount++;
     }
@@ -74,7 +74,7 @@ int trim(char** strPtr){
 int indexOfLastNon(char* str){
     int counter = strlen(str)-1;
     char* end = str + strlen(str) - 1;
-    while( *end == ' '){
+    while( *end == ' ' || *end == '"'){
         counter--;
         end--;
     }
@@ -86,7 +86,7 @@ int countNonWhite(char* str){
     int counter=0;
     char* ptr = str;
     while( *ptr != '\0' ){
-        if( *ptr != ' ' )
+        if( *ptr != ' ' || *ptr != '"')
             counter++;
         ptr++;
     }
@@ -186,20 +186,23 @@ int main(int argc, char** argv){
 	// if you get to the end of the column, it's a numeric
 	// set boolean isNum (0 or 1)
 
-    int counter_ = 0;
+    //int counter_ = 0;
 	int isNum_ = 1;
 	while(getline(&line,&n,stdin) != -1){
-	    printf("%d: %s\n",counter_,line);
-        counter_++;
+	    //printf("%d:\n",counter_);
+        //counter_++;
 	
         // remove the \n if it is there
 		int len = strlen(line);
-        if(line[len-1] == '\n')
+        if(line[len-1] == '\n'){
             line[len-1] = '\0';
+            //printf("removed new line\n");
+        }
         int i = 0;
         int commaCount = 0;
 	    int isNull = 0;
-
+        int quotation = 0;
+    
         int length = strlen(line);
         for(i = 0; i < length; i++){
             // check if the column we are sorting by is the first one
@@ -235,16 +238,16 @@ int main(int argc, char** argv){
                     // by finding the amount of non-white space
                     // characters
                     int itemLength = trim(&tempItem);
+// NOT DOING THIS WAY ANYMORE
                     item = (char*)malloc(sizeof(char)*(itemLength+1)); // adding one more for the null terminator
                     item[itemLength] = '\0';     // check trim to see if the null character was set already
 					strcpy(item,tempItem);
-                    free(tempItem);
+                    //free(tempItem); // I THINK THIS IS BREAKING STUFF
 
                     // add to LL
                     temp->row = (char*)malloc((strlen(line)+1)*sizeof(char));
-                    //temp->row = "a";
                     strcpy(temp->row, line);
-                    temp->data =item;
+                    temp->data =item; // changed from item to fix something
 
                     temp->next = head;
                     head = temp;
@@ -254,7 +257,13 @@ int main(int argc, char** argv){
 			    }
 				break;
             }
-            if(line[i] == ',') { commaCount++; }
+            if(line[i] == '"'){
+                if(quotation == 0)
+                    quotation = 1;
+                else quotation = 0;
+            }
+            if(quotation == 0)
+                if(line[i] == ',') { commaCount++; }
             if(index == commaCount){ // if matching index (sorting column) 
 		        // check if null
 				// if not, isolate item
@@ -290,27 +299,35 @@ int main(int argc, char** argv){
                     numBytes++;
                     i++;
                 }
-
+                //printf("Pre-node creation\n");
                 char* tempItem = (char*)malloc(sizeof(char)*(numBytes+1)); // Allocating an extra byte for the null character
                 char* item; // allocate extra byte for null char
                 memcpy(tempItem, line + ptrOffset, numBytes);
                 tempItem[numBytes] = '\0'; // add null char end                                     
                 int itemLength = trim(&tempItem);
+
+ // WE ARE NOT DOING THIS WAY BC IT IS BREAKING BECAUSE OF THE FREE
                 item = (char*)malloc((itemLength+1)*sizeof(char));
                 item[itemLength] = '\0';
                 strcpy(item,tempItem);
-                free(tempItem);
+
+                //printf("Pre-Free\n");
+                //free(tempItem); // THIS LINE IS BREAKING OUR FUCKING CODE WHAT THE FUCK
+                //printf("Post-Free\n");
 
 				// add to LL
 				node* temp = (node*)malloc(sizeof(node));
+                //printf("Line length: %d, line: %s\n",strlen(line),line);
+				//printf("PRE-ROW MALLOC\n");
                 temp->row =(char*) malloc((strlen(line)+1)*sizeof(char));   //malloc(sizeof(line));
-                //temp->row = "a";
+                //printf("POST-ROW MALLOC\n");	
                 strcpy(temp->row, line);
-                temp->data =item;
 
+                temp->data =item; // changing from just item
 				temp->next = head;
                 head = temp;
 
+                //printf("Post-node creation\n");
 				// check if item has any non-num chars
 				isNum_ = isNum_ & isNum(&item);
 			    //	i = length;
